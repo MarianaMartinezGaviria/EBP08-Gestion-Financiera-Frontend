@@ -141,7 +141,10 @@ export function BudgetsPage() {
 
       {/* Formulario de Nuevo Presupuesto */}
       {showForm && (
-        <div className="bg-card p-6 rounded-xl shadow-md border border-border">
+        <div
+          id="budget-form-anchor"
+          className="bg-card p-6 rounded-xl shadow-md border border-border scroll-mt-24"
+        >
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-foreground">Crear Nuevo Presupuesto</h2>
@@ -385,12 +388,18 @@ export function BudgetsPage() {
                     </div>
 
                     <button
+                      type="button"
                       onClick={() => {
                         setBudgetType('category');
                         setCategoryId(category.id);
                         setShowForm(true);
+                        window.setTimeout(() => {
+                          document
+                            .getElementById('budget-form-anchor')
+                            ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }, 50);
                       }}
-                      className="w-full mt-2 py-2 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-colors text-sm"
+                      className="w-full mt-2 py-2.5 px-3 text-sm font-medium rounded-lg bg-primary text-primary-foreground shadow-sm hover:opacity-90 transition-opacity cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                     >
                       Asignar presupuesto
                     </button>
