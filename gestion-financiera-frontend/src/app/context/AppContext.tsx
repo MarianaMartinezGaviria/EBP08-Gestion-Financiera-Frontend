@@ -17,6 +17,7 @@ import type {
   TipoTransaccionApi,
 } from '../services/api';
 import * as api from '../services/api';
+import { apiDateToLocalYmd } from '../lib/calendarDate';
 
 const ICON_FALLBACK = ['📁', '💼', '🏠', '🍔', '💳', '🎯', '📌', '🧾'];
 
@@ -48,8 +49,7 @@ function mapBackendCategory(c: BackendCategoria): Category {
 }
 
 function mapBackendTransaction(tx: BackendTransaccion): Transaction {
-  const dateRaw = tx.fecha ?? '';
-  const dateSlice = dateRaw.length >= 10 ? dateRaw.slice(0, 10) : dateRaw;
+  const dateSlice = apiDateToLocalYmd(tx.fecha ?? null);
   const categoryId =
     tx.categoria?.id !== undefined ? String(tx.categoria.id) : '';
 
@@ -62,7 +62,7 @@ function mapBackendTransaction(tx: BackendTransaccion): Transaction {
     amount: toNumber(tx.monto),
     type: kind,
     categoryId,
-    date: dateSlice || new Date().toISOString().slice(0, 10),
+    date: dateSlice,
   };
 }
 
@@ -96,8 +96,8 @@ function mapFrequencyToApi(
 }
 
 function mapScheduledFromApi(p: BackendTransaccionProgramada): ScheduledTransaction {
-  const start = (p.fechaInicio ?? '').slice(0, 10);
-  const fin = p.fechaFin ? p.fechaFin.slice(0, 10) : start;
+  const start = p.fechaInicio ? apiDateToLocalYmd(p.fechaInicio) : '';
+  const fin = p.fechaFin ? apiDateToLocalYmd(p.fechaFin) : start;
   return {
     id: String(p.id),
     description: p.descripcion?.trim() || '—',
@@ -119,7 +119,7 @@ function buildBudgetsFromApi(
   const msgGlobal = global.mensaje?.trim();
 
   if (global.presupuestoDefinido && global.montoLimite != null && global.fechaLimite) {
-    const monthSlice = global.fechaLimite.slice(0, 7);
+    const monthSlice = apiDateToLocalYmd(global.fechaLimite).slice(0, 7);
     list.push({
       id: `global-${monthSlice}`,
       name: 'Presupuesto mensual global',
@@ -133,7 +133,7 @@ function buildBudgetsFromApi(
 
   for (const row of categorias) {
     if (!row.fechaLimite) continue;
-    const monthSlice = row.fechaLimite.slice(0, 7);
+    const monthSlice = apiDateToLocalYmd(row.fechaLimite).slice(0, 7);
     list.push({
       id: `cat-${row.idCategoria}-${monthSlice}`,
       name: `${row.nombreCategoria}`,

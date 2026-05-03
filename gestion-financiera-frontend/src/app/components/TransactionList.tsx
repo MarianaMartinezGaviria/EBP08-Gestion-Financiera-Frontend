@@ -1,5 +1,6 @@
 import { TrendingUp, TrendingDown, Calendar, Tag } from 'lucide-react';
 import type { Transaction, Category } from '../types';
+import { formatYmdLocal } from '../lib/calendarDate';
 
 interface TransactionListProps {
   transactions: Transaction[];
@@ -11,14 +12,12 @@ export function TransactionList({ transactions, categories }: TransactionListPro
     return categories.find(c => c.id === id);
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('es-ES', {
+  const formatDate = (dateString: string) =>
+    formatYmdLocal(dateString, 'es-ES', {
       day: '2-digit',
       month: 'short',
-      year: 'numeric'
+      year: 'numeric',
     });
-  };
 
   const formatAmount = (amount: number, type: 'income' | 'expense') => {
     const formatted = new Intl.NumberFormat('es-CO', {
