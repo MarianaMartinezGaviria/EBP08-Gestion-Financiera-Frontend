@@ -7,7 +7,7 @@ import logo from '../../imports/Logo_login.png';
 
 export function LoginPage() {
   const navigate = useNavigate();
-  const { user, setUser, validateLogin } = useApp();
+  const { user, validateLogin } = useApp();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -32,20 +32,25 @@ export function LoginPage() {
 
     setLoading(true);
 
-    // Simulación de login con delay
-    setTimeout(() => {
-      const validatedUser = validateLogin(email, password);
-
-      if (validatedUser) {
-        setUser(validatedUser);
+    void (async () => {
+      try {
+        const authenticated = await validateLogin(email, password.trim());
+        if (!authenticated) {
+          setError('No se pudo completar el inicio de sesión.');
+          return;
+        }
         toast.success('¡Bienvenido!');
-        setLoading(false);
         navigate('/');
-      } else {
-        setError('Correo electrónico o contraseña incorrectos. Si no tienes cuenta, regístrate primero.');
+      } catch (err) {
+        setError(
+          err instanceof Error
+            ? err.message
+            : 'Correo electrónico o contraseña incorrectos. Si no tienes cuenta, regístrate primero.',
+        );
+      } finally {
         setLoading(false);
       }
-    }, 800);
+    })();
   };
 
   return (

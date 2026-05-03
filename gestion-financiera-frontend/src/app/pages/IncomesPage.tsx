@@ -72,16 +72,23 @@ export function IncomesPage() {
       frequency,
     };
 
-    if (editingIncome) {
-      updateScheduledTransaction(editingIncome.id, incomeData);
-      toast.success('Ingreso programado actualizado');
-      setEditingIncome(null);
-    } else {
-      addScheduledTransaction(incomeData);
-      toast.success('Ingreso programado creado. Se aplicará automáticamente en las fechas programadas.');
-    }
-
-    resetForm();
+    void (async () => {
+      try {
+        if (editingIncome) {
+          await updateScheduledTransaction(editingIncome.id, incomeData);
+          toast.success('Ingreso programado actualizado');
+          setEditingIncome(null);
+        } else {
+          await addScheduledTransaction(incomeData);
+          toast.success(
+            'Ingreso programado creado. Se aplicará automáticamente en las fechas programadas.',
+          );
+        }
+        resetForm();
+      } catch (e) {
+        toast.error(e instanceof Error ? e.message : 'No se pudo guardar el ingreso programado');
+      }
+    })();
   };
 
   const resetForm = () => {
@@ -108,9 +115,16 @@ export function IncomesPage() {
 
   const confirmDelete = () => {
     if (!deletingIncome) return;
-    deleteScheduledTransaction(deletingIncome.id);
-    toast.success('Ingreso programado eliminado');
-    setDeletingIncome(null);
+
+    void (async () => {
+      try {
+        await deleteScheduledTransaction(deletingIncome.id);
+        toast.success('Ingreso programado eliminado');
+        setDeletingIncome(null);
+      } catch (e) {
+        toast.error(e instanceof Error ? e.message : 'No se pudo eliminar');
+      }
+    })();
   };
 
   const formatCurrency = (amount: number) => {

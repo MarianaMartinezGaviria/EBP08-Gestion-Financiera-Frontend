@@ -43,20 +43,21 @@ export function ProfilePage() {
       return;
     }
 
-    // Intentar cambiar contraseña
-    if (!user) return;
+    void (async () => {
+      if (!user) return;
 
-    const success = changePassword(user.email, currentPassword, newPassword);
+      const success = await changePassword(currentPassword, newPassword);
 
-    if (success) {
-      toast.success('Contraseña actualizada');
-      setCurrentPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
-      setErrors({});
-    } else {
-      setErrors({ currentPassword: 'Contraseña actual incorrecta' });
-    }
+      if (success) {
+        toast.success('Contraseña actualizada');
+        setCurrentPassword('');
+        setNewPassword('');
+        setConfirmPassword('');
+        setErrors({});
+      } else {
+        setErrors({ currentPassword: 'Contraseña actual incorrecta o no se pudo actualizar.' });
+      }
+    })();
   };
 
   return (

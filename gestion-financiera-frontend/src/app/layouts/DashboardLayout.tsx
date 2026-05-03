@@ -1,6 +1,7 @@
 import { Outlet, useNavigate, useLocation, Link } from 'react-router';
 import { LogOut, Wallet, LayoutDashboard, Target, FolderOpen, Menu, X, TrendingUp, TrendingDown, User } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import * as api from '../services/api';
 import { useState, useEffect } from 'react';
 
 export function DashboardLayout() {
@@ -21,8 +22,12 @@ export function DashboardLayout() {
   }
 
   const handleLogout = () => {
-    setUser(null);
-    navigate('/login');
+    void (async () => {
+      await api.logoutUsuarioRemoto().catch(() => undefined);
+      api.clearAuth();
+      setUser(null);
+      navigate('/login');
+    })();
   };
 
   const navItems = [

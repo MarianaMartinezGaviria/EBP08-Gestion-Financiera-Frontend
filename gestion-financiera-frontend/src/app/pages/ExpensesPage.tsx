@@ -72,16 +72,23 @@ export function ExpensesPage() {
       frequency,
     };
 
-    if (editingExpense) {
-      updateScheduledTransaction(editingExpense.id, expenseData);
-      toast.success('Gasto programado actualizado');
-      setEditingExpense(null);
-    } else {
-      addScheduledTransaction(expenseData);
-      toast.success('Gasto programado creado. Se aplicará automáticamente en las fechas programadas.');
-    }
-
-    resetForm();
+    void (async () => {
+      try {
+        if (editingExpense) {
+          await updateScheduledTransaction(editingExpense.id, expenseData);
+          toast.success('Gasto programado actualizado');
+          setEditingExpense(null);
+        } else {
+          await addScheduledTransaction(expenseData);
+          toast.success(
+            'Gasto programado creado. Se aplicará automáticamente en las fechas programadas.',
+          );
+        }
+        resetForm();
+      } catch (e) {
+        toast.error(e instanceof Error ? e.message : 'No se pudo guardar el gasto programado');
+      }
+    })();
   };
 
   const resetForm = () => {
@@ -108,9 +115,16 @@ export function ExpensesPage() {
 
   const confirmDelete = () => {
     if (!deletingExpense) return;
-    deleteScheduledTransaction(deletingExpense.id);
-    toast.success('Gasto programado eliminado');
-    setDeletingExpense(null);
+
+    void (async () => {
+      try {
+        await deleteScheduledTransaction(deletingExpense.id);
+        toast.success('Gasto programado eliminado');
+        setDeletingExpense(null);
+      } catch (e) {
+        toast.error(e instanceof Error ? e.message : 'No se pudo eliminar');
+      }
+    })();
   };
 
   const formatCurrency = (amount: number) => {

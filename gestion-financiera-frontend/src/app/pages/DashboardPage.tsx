@@ -6,15 +6,24 @@ import { TransactionList } from '../components/TransactionList';
 import { TransactionForm } from '../components/TransactionForm';
 import { MonthlyBalance } from '../components/MonthlyBalance';
 
+/** YYYY-MM en calendario local (coincide con <input type="month">). */
+function yearMonthLocal(d = new Date()): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+}
+
+/** Mes calendario de una transacción sin pasar por UTC (evita perder movimientos al filtrar). */
+function transactionYearMonth(dateStr: string): string {
+  if (dateStr.length >= 7) return dateStr.slice(0, 7);
+  return '';
+}
+
 export function DashboardPage() {
   const { transactions, addTransaction, categories } = useApp();
-  const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7));
+  const [selectedMonth, setSelectedMonth] = useState(yearMonthLocal);
 
-  // Filtrar transacciones por mes
-  const filteredTransactions = transactions.filter(t => {
-    const transactionMonth = new Date(t.date).toISOString().slice(0, 7);
-    return transactionMonth === selectedMonth;
-  });
+  const filteredTransactions = transactions.filter(
+    (t) => transactionYearMonth(t.date) === selectedMonth,
+  );
 
   return (
     <div className="max-w-7xl mx-auto p-4 sm:p-6 space-y-6">
@@ -50,9 +59,7 @@ export function DashboardPage() {
         {/* Transaction Form */}
         <div className="lg:col-span-1">
           <TransactionForm
-            onAddTransaction={(transaction) => {
-              addTransaction(transaction);
-            }}
+            onAddTransaction={(transaction) => addTransaction(transaction)}
             categories={categories}
           />
         </div>
