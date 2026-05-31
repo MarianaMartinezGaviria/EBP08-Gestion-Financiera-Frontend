@@ -21,14 +21,6 @@ export function LoginPage() {
     }
   }, [user, navigate]);
 
-  // Ping para despertar el backend
-  useEffect(() => {
-    fetch('https://ebp08-gestion-financiera-backend.onrender.com/api/usuarios/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ correo: '', clave: '' })
-    }).catch(() => {});
-  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

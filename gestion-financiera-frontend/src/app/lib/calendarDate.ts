@@ -4,6 +4,8 @@
  * Aquí todo lo que mostramos/filtramos como “día civil” usa calendario local.
  */
 
+import { isValid, parseISO } from 'date-fns';
+
 export function ymdFromParts(year: number, month1to12: number, day: number): string {
   return `${year}-${String(month1to12).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 }
@@ -18,21 +20,26 @@ export function parseYmdLocal(ymd: string): Date {
 /**
  * Convierte `fecha` del backend (ISO con/sin Z, LocalDateTime JSON, etc.)
  * al día de calendario local como YYYY-MM-DD.
+ *
+ * Usamos `parseISO` para evitar que valores como `YYYY-MM-DD` se
+ * interpreten como medianoche UTC en algunos motores JS.
  */
 export function apiDateToLocalYmd(raw: string | undefined | null): string {
   if (raw == null || String(raw).trim() === '') {
     const n = new Date();
     return ymdFromParts(n.getFullYear(), n.getMonth() + 1, n.getDate());
   }
+
   const trimmed = String(raw).trim();
   if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
-    const [y, mo, d] = trimmed.split('-').map(Number);
-    return ymdFromParts(y, mo, d);
+    return trimmed;
   }
-  const d = new Date(trimmed);
-  if (Number.isNaN(d.getTime())) {
+
+  const d = parseISO(trimmed);
+  if (!isValid(d)) {
     return trimmed.length >= 10 ? trimmed.slice(0, 10) : trimmed;
   }
+
   return ymdFromParts(d.getFullYear(), d.getMonth() + 1, d.getDate());
 }
 
