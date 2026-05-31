@@ -296,8 +296,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       name: appUser.name,
       email: appUser.email,
     });
+    // Guardar usuario en estado; la sincronización con el backend
+    // se realiza desde el efecto `useEffect` que escucha `user`.
     setUser(appUser);
-    await syncFromBackend().catch(() => undefined);
     return appUser;
   };
 
@@ -318,8 +319,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       name: appUser.name,
       email: appUser.email,
     });
+    // Guardar usuario en estado; `syncFromBackend` será lanzado
+    // automáticamente por el efecto que escucha cambios en `user`.
     setUser(appUser);
-    await syncFromBackend().catch(() => undefined);
     return appUser;
   };
 
