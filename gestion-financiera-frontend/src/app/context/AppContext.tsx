@@ -332,9 +332,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     try {
       await api.actualizarClaveUsuario(oldPassword, newPassword);
       return true;
-    } catch {
-      return false;
+    } catch (err) {
+    if (err instanceof Error) {
+      throw new Error(err.message);
     }
+    throw new Error('No se pudo actualizar la contraseña. Intenta de nuevo.');
+  }
   };
 
   const sendPasswordResetEmail = (_email: string) => {

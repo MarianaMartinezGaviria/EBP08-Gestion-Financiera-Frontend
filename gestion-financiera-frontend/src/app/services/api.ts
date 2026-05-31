@@ -158,7 +158,9 @@ async function handleJsonResponse<T>(response: Response, opts?: { allow401Naviga
       clearAuth();
       window.location.href = '/login';
     }
-    throw new Error('Sesión expirada o acceso denegado');
+    const text = await response.text();
+    const msg = parseMaybeJsonMessage(text) || text?.trim();
+    throw new Error(msg || 'Sesión expirada o acceso denegado');
   }
 
   if (!response.ok) {
@@ -253,7 +255,7 @@ export const actualizarClaveUsuario = async (claveAntigua: string, claveNueva: s
     method: 'PUT',
     body: JSON.stringify({ claveAntigua, claveNueva }),
   });
-  return handleJsonResponse<string>(response);
+  return handleJsonResponse<string>(response, { allow401Navigate: false });
 };
 
 // ——— Categorías ———
