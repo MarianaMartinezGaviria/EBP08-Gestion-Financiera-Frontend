@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router';
 import { LogIn, Mail, Lock, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { toast } from 'sonner';
-import logo from '../../imports/Logo_login.png';
+import { AppLogo } from '../components/AppLogo';
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -59,11 +59,7 @@ export function LoginPage() {
       <div className="w-full max-w-md">
         {/* Logo y Header */}
         <div className="text-center mb-8">
-          <img
-            src={logo}
-            alt="Logo"
-            className="w-20 h-20 object-contain mx-auto mb-4"
-          />
+          <AppLogo className="h-20 w-auto mx-auto mb-4" />
           <h1 className="text-foreground mb-2">Gestión Financiera</h1>
           <p className="text-muted-foreground">Ingresa a tu cuenta para continuar</p>
         </div>

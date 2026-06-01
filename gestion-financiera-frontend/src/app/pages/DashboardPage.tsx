@@ -5,6 +5,7 @@ import { Summary } from '../components/Summary';
 import { TransactionList } from '../components/TransactionList';
 import { TransactionForm } from '../components/TransactionForm';
 import { MonthlyBalance } from '../components/MonthlyBalance';
+import { BudgetAlertBanner } from '../components/BudgetAlertBanner';
 
 /** YYYY-MM en calendario local (coincide con <input type="month">). */
 function yearMonthLocal(d = new Date()): string {
@@ -47,6 +48,8 @@ export function DashboardPage() {
           />
         </div>
       </div>
+
+      <BudgetAlertBanner transactions={filteredTransactions} budgets={budgets} month={selectedMonth} />
 
       {/* Balance Mensual */}
       <MonthlyBalance transactions={filteredTransactions} month={selectedMonth} />

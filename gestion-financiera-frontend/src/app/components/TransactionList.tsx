@@ -56,10 +56,10 @@ export function TransactionList({ transactions, categories }: TransactionListPro
         return (
           <div
             key={transaction.id}
-            className="bg-card p-4 rounded-xl border border-border hover:shadow-lg transition-shadow"
+            className="group relative bg-card p-4 rounded-xl border border-border hover:shadow-lg hover:border-primary/20 transition-all duration-200"
           >
-            <div className="flex items-start justify-between">
-              <div className="flex items-start gap-3 flex-1">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-start gap-3 flex-1 min-w-0">
                 <div
                   className={`w-10 h-10 rounded-lg flex items-center justify-center ${
                     isIncome ? 'bg-primary/10' : 'bg-destructive/10'
@@ -72,17 +72,15 @@ export function TransactionList({ transactions, categories }: TransactionListPro
                   )}
                 </div>
 
-                <div className="flex-1">
-                  <h3 className="text-foreground mb-1">
-                    {transaction.description}
-                  </h3>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-foreground mb-1 truncate">{transaction.description}</h3>
 
-                  <div className="flex items-center gap-4 text-muted-foreground">
+                  <div className="flex flex-wrap items-center gap-3 text-muted-foreground">
                     <div className="flex items-center gap-1">
                       <Tag className="w-4 h-4" />
-                      <span className="inline-flex items-center gap-1 bg-accent px-2 py-1 rounded-md text-accent-foreground">
+                      <span className="inline-flex items-center gap-1 bg-accent px-2 py-0.5 rounded-md text-accent-foreground text-sm">
                         <span>{category?.icon}</span>
-                        <span>{category?.name}</span>
+                        <span className="truncate max-w-24">{category?.name}</span>
                       </span>
                     </div>
 
