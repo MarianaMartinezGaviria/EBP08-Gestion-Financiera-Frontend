@@ -265,8 +265,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
             email: appUser.email,
           });
           setUser(appUser);
-        } catch {
-          api.clearAuth();
+        } catch (err) {
+          // Solo limpiar autenticación si es un error 401 (unauthorized) o 403 (forbidden)
+          // No limpiar por errores de red o 500 (server error)
+          if (err instanceof Error && (err.message.includes('401') || err.message.includes('403'))) {
+            api.clearAuth();
+          }
+          // Si es otro tipo de error (red, 500, etc), mantener la sesión
         }
       })();
     }
@@ -325,31 +330,40 @@ export function AppProvider({ children }: { children: ReactNode }) {
     email: string,
     password: string,
   ): Promise<User | null> => {
-    const token = await api.loginUsuario(email.trim(), password);
-    api.saveAuthToken(token);
-
-    let appUser: User;
     try {
-      const backendUser = await api.getUsuarioActual();
-      appUser = mapUsuarioRegistro(backendUser);
-    } catch {
-      const sub = api.decodeJwtSubject(token);
-      if (!sub) {
-        api.clearAuth();
-        return null;
-      }
-      appUser = userFromJwtAndStored(sub);
-    }
+      const token = await api.loginUsuario(email.trim(), password);
+      api.saveAuthToken(token);
+      console.log('[Auth] Token guardado correctamente');
 
-    api.saveUser({
-      id: appUser.id,
-      name: appUser.name,
-      email: appUser.email,
-    });
-    // Guardar usuario en estado; `syncFromBackend` será lanzado
-    // automáticamente por el efecto que escucha cambios en `user`.
-    setUser(appUser);
-    return appUser;
+      let appUser: User;
+      try {
+        const backendUser = await api.getUsuarioActual();
+        appUser = mapUsuarioRegistro(backendUser);
+        console.log('[Auth] Usuario obtenido del backend:', appUser);
+      } catch (err) {
+        console.warn('[Auth] No se pudo obtener usuario del backend, usando JWT:', err);
+        const sub = api.decodeJwtSubject(token);
+        if (!sub) {
+          console.error('[Auth] No se pudo decodificar el JWT');
+          api.clearAuth();
+          throw new Error('Token inválido: no se pudo extraer el email');
+        }
+        appUser = userFromJwtAndStored(sub);
+      }
+
+      api.saveUser({
+        id: appUser.id,
+        name: appUser.name,
+        email: appUser.email,
+      });
+      console.log('[Auth] Usuario guardado en localStorage');
+      setUser(appUser);
+      return appUser;
+    } catch (err) {
+      console.error('[Auth] Error en validateLogin:', err);
+      api.clearAuth();
+      throw err;
+    }
   };
 
   const changePassword = async (

@@ -76,10 +76,13 @@ export interface ResumenPresupuestoCategoria {
 const TOKEN_KEY = 'authToken';
 const USER_KEY = 'user';
 
-export const getToken = (): string | null => localStorage.getItem(TOKEN_KEY);
+export const getToken = (): string | null => {
+  const token = localStorage.getItem(TOKEN_KEY);
+  return token ? token.trim() : null;
+};
 
 export const saveAuthToken = (token: string): void => {
-  localStorage.setItem(TOKEN_KEY, token);
+  localStorage.setItem(TOKEN_KEY, token.trim());
 };
 
 export const saveUser = (user: StoredUserPayload): void => {
@@ -154,12 +157,14 @@ async function handleJsonResponse<T>(response: Response, opts?: { allow401Naviga
   const allow401Navigate = opts?.allow401Navigate ?? true;
 
   if (response.status === 401 || response.status === 403) {
+    const text = await response.text();
+    const msg = parseMaybeJsonMessage(text) || text?.trim();
+    
     if (allow401Navigate) {
+      console.warn('[API] Sesión expirada (401/403). Limpiando autenticación.');
       clearAuth();
       window.location.href = '/login';
     }
-    const text = await response.text();
-    const msg = parseMaybeJsonMessage(text) || text?.trim();
     throw new Error(msg || 'Sesión expirada o acceso denegado');
   }
 
@@ -206,38 +211,42 @@ export const registerUsuario = async (
 };
 
 export const loginUsuario = async (correo: string, clave: string): Promise<string> => {
+  console.log('[DEBUG] Intentando login para:', correo);
+  
   const response = await fetch(`${BASE_URL}/usuarios/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ correo, clave }),
   });
 
+  console.log('[DEBUG] Response status:', response.status);
+  console.log('[DEBUG] Content-Type:', response.headers.get('content-type'));
+
   if (!response.ok) {
     const text = await response.text();
+    console.error('[DEBUG] Error response:', text);
     throw new Error(parseMaybeJsonMessage(text) || text?.trim() || `Error ${response.status}`);
   }
 
-  let tokenRaw: unknown;
-  const ct = response.headers.get('content-type');
-  if (ct?.includes('application/json')) {
-    tokenRaw = await response.json();
-  } else {
-    tokenRaw = (await response.text()).trim().replace(/^"|"$/g, '');
+  // Leer el body como texto (el backend devuelve el token como string plano)
+  const tokenText = await response.text();
+  console.log('[DEBUG] Token recibido (raw):', tokenText.substring(0, 50) + '...');
+  
+  // Limpiar el token: eliminar comillas si las tiene y espacios
+  let token = tokenText.trim();
+  if (token.startsWith('"') && token.endsWith('"')) {
+    token = token.slice(1, -1);
+  }
+  
+  console.log('[DEBUG] Token limpio:', token.substring(0, 50) + '...');
+  console.log('[DEBUG] Token length:', token.length);
+
+  if (!token || token.length === 0) {
+    console.error('[DEBUG] Token vacío o inválido');
+    throw new Error('No se recibió token');
   }
 
-  if (typeof tokenRaw === 'object' && tokenRaw !== null && 'token' in tokenRaw) {
-    tokenRaw = (tokenRaw as { token?: unknown }).token;
-  }
-
-  const token =
-    typeof tokenRaw === 'string'
-      ? tokenRaw.replace(/^"|"$/g, '')
-      : tokenRaw !== null && tokenRaw !== undefined
-        ? String(tokenRaw)
-        : '';
-
-  if (!token) throw new Error('No se recibió token');
-
+  console.log('[DEBUG] Login exitoso, token guardado');
   return token;
 };
 
