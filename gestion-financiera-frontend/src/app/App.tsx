@@ -9,7 +9,7 @@ export default function App() {
 
   useEffect(() => {
     // Ping global para despertar el backend al cargar cualquier página
-    fetch('https://ebp08-gestion-financiera-backend.onrender.com/api/usuarios/login', {
+    fetch('https://eko-gestion-financiera-backend.onrender.com/api/usuarios/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ correo: '', clave: '' })
