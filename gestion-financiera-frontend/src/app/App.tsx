@@ -8,13 +8,9 @@ import { Toaster } from './components/ui/sonner';
 export default function App() {
 
   useEffect(() => {
-    // Ping global para despertar el backend al cargar cualquier página
-    fetch('https://eko-gestion-financiera-backend.onrender.com/api/usuarios/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ correo: '', clave: '' })
-    }).catch(() => {});
-  }, []);
+  fetch('https://eko-gestion-financiera-backend.onrender.com/swagger-ui/index.html')
+    .catch(() => {});
+}, []);
 
   return (
     <ThemeProvider>
