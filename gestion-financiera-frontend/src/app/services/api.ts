@@ -225,6 +225,10 @@ export const loginUsuario = async (correo: string, clave: string): Promise<strin
     tokenRaw = (await response.text()).trim().replace(/^"|"$/g, '');
   }
 
+  if (typeof tokenRaw === 'object' && tokenRaw !== null && 'token' in tokenRaw) {
+    tokenRaw = (tokenRaw as { token?: unknown }).token;
+  }
+
   const token =
     typeof tokenRaw === 'string'
       ? tokenRaw.replace(/^"|"$/g, '')
@@ -235,6 +239,11 @@ export const loginUsuario = async (correo: string, clave: string): Promise<strin
   if (!token) throw new Error('No se recibió token');
 
   return token;
+};
+
+export const getUsuarioActual = async (): Promise<BackendUsuario> => {
+  const response = await fetchAuthorized('/usuarios/me');
+  return handleJsonResponse<BackendUsuario>(response);
 };
 
 export const logoutUsuarioRemoto = async (): Promise<void> => {

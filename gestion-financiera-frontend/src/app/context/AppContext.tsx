@@ -254,6 +254,25 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [syncFromBackend]);
 
   useEffect(() => {
+    if (!user && api.getToken()) {
+      void (async () => {
+        try {
+          const backendUser = await api.getUsuarioActual();
+          const appUser = mapUsuarioRegistro(backendUser);
+          api.saveUser({
+            id: appUser.id,
+            name: appUser.name,
+            email: appUser.email,
+          });
+          setUser(appUser);
+        } catch {
+          api.clearAuth();
+        }
+      })();
+    }
+  }, [user]);
+
+  useEffect(() => {
     if (!user || !api.getToken()) return;
     syncFromBackend().catch(() => {
       /** Error de red: no cerramos sesión automáticamente; el usuario puede reintentar al navegar */
@@ -308,12 +327,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
   ): Promise<User | null> => {
     const token = await api.loginUsuario(email.trim(), password);
     api.saveAuthToken(token);
-    const sub = api.decodeJwtSubject(token);
-    if (!sub) {
-      api.clearAuth();
-      return null;
+
+    let appUser: User;
+    try {
+      const backendUser = await api.getUsuarioActual();
+      appUser = mapUsuarioRegistro(backendUser);
+    } catch {
+      const sub = api.decodeJwtSubject(token);
+      if (!sub) {
+        api.clearAuth();
+        return null;
+      }
+      appUser = userFromJwtAndStored(sub);
     }
-    const appUser = userFromJwtAndStored(sub);
+
     api.saveUser({
       id: appUser.id,
       name: appUser.name,
